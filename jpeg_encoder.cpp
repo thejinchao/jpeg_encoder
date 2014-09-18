@@ -236,7 +236,7 @@ bool JpegEncoder::encodeToJPG(const char* fileName, int quality_scale)
 	FILE* fp = fopen(fileName, "wb");
 	if(fp==0) return false;
 
-	//初始化向量表
+	//初始化量化表
 	_initQualityTables(quality_scale);
 
 	//文件头

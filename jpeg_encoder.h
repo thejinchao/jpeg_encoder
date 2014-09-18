@@ -39,20 +39,20 @@ private:
 	void _initCategoryAndBitcode(void);
 	void _initQualityTables(int quality);
 	void _computeHuffmanTable(const char* nr_codes, const unsigned char* std_table, BitString* huffman_table);
-
-	void _doHuffmanEncoding(const short* DU, short& prevDC, const BitString* HTDC, const BitString* HTAC, 
-		BitString* outputBitString, int& bitStringCounts);
-	void _convertColorSpace(int xPos, int yPos, char* yData, char* cbData, char* crData);
-	void _foword_FDC(const char* channel_data, short* fdc_data);
 	BitString _getBitCode(int value);
 
+	void _convertColorSpace(int xPos, int yPos, char* yData, char* cbData, char* crData);
+	void _foword_FDC(const char* channel_data, short* fdc_data);
+	void _doHuffmanEncoding(const short* DU, short& prevDC, const BitString* HTDC, const BitString* HTAC, 
+		BitString* outputBitString, int& bitStringCounts);
+
 private:
+	void _write_jpeg_header(FILE* fp);
 	void _write_byte_(unsigned char value, FILE* fp);
 	void _write_word_(unsigned short value, FILE* fp);
 	void _write_bitstring_(const BitString* bs, int counts, int& newByte, int& newBytePos, FILE* fp);
 	void _write_(const void* p, int byteSize, FILE* fp);
 
-	void _write_jpeg_header(FILE* fp);
 public:
 	JpegEncoder();
 	~JpegEncoder();
