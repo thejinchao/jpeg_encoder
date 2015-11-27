@@ -23,7 +23,7 @@ const unsigned char Luminance_Quantization_Table[64] =
 };
 
 //-------------------------------------------------------------------------------
-const unsigned char Chromiance_Quantization_Table[64] = 
+const unsigned char Chrominance_Quantization_Table[64] = 
 {
 	17,  18,  24,  47,  99,  99,  99,  99,
 	18,  21,  26,  66,  99,  99,  99,  99,
@@ -53,8 +53,8 @@ const char Standard_DC_Luminance_NRCodes[] = { 0, 0, 7, 1, 1, 1, 1, 1, 0, 0, 0, 
 const unsigned char Standard_DC_Luminance_Values[] = { 4, 5, 3, 2, 6, 1, 0, 7, 8, 9, 10, 11 };
 
 //-------------------------------------------------------------------------------
-const char Standard_DC_Chromiance_NRCodes[] = { 0, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0 };
-const unsigned char Standard_DC_Chromiance_Values[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
+const char Standard_DC_Chrominance_NRCodes[] = { 0, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0 };
+const unsigned char Standard_DC_Chrominance_Values[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
 
 //-------------------------------------------------------------------------------
 const char Standard_AC_Luminance_NRCodes[] = { 0, 2, 1, 3, 3, 2, 4, 3, 5, 5, 4, 4, 0, 0, 1, 0x7d };
@@ -84,8 +84,8 @@ const unsigned char Standard_AC_Luminance_Values[] =
 };
 
 //-------------------------------------------------------------------------------
-const char Standard_AC_Chromiance_NRCodes[] = { 0, 2, 1, 2, 4, 4, 3, 4, 7, 5, 4, 4, 0, 1, 2, 0x77 };
-const unsigned char Standard_AC_Chromiance_Values[] =
+const char Standard_AC_Chrominance_NRCodes[] = { 0, 2, 1, 2, 4, 4, 3, 4, 7, 5, 4, 4, 0, 1, 2, 0x77 };
+const unsigned char Standard_AC_Chrominance_Values[] =
 {
 	0x00, 0x01, 0x02, 0x03, 0x11, 0x04, 0x05, 0x21,
 	0x31, 0x06, 0x12, 0x41, 0x51, 0x07, 0x61, 0x71,
@@ -292,10 +292,10 @@ void JpegEncoder::_initHuffmanTables(void)
 	_computeHuffmanTable(Standard_AC_Luminance_NRCodes, Standard_AC_Luminance_Values, m_Y_AC_Huffman_Table);
 
 	memset(&m_CbCr_DC_Huffman_Table, 0, sizeof(m_CbCr_DC_Huffman_Table));
-	_computeHuffmanTable(Standard_DC_Chromiance_NRCodes, Standard_DC_Chromiance_Values, m_CbCr_DC_Huffman_Table);
+	_computeHuffmanTable(Standard_DC_Chrominance_NRCodes, Standard_DC_Chrominance_Values, m_CbCr_DC_Huffman_Table);
 
 	memset(&m_CbCr_AC_Huffman_Table, 0, sizeof(m_CbCr_AC_Huffman_Table));
-	_computeHuffmanTable(Standard_AC_Chromiance_NRCodes, Standard_AC_Chromiance_Values, m_CbCr_AC_Huffman_Table);
+	_computeHuffmanTable(Standard_AC_Chrominance_NRCodes, Standard_AC_Chrominance_Values, m_CbCr_AC_Huffman_Table);
 }
 //-------------------------------------------------------------------------------
 JpegEncoder::BitString JpegEncoder::_getBitCode(int value)
@@ -326,7 +326,7 @@ void JpegEncoder::_initQualityTables(int quality_scale)
 		if (temp>0xFF) temp = 0xFF;
 		m_YTable[ZigZag[i]] = (unsigned char)temp;
 
-		temp = ((int)(Chromiance_Quantization_Table[i] * quality_scale + 50) / 100);
+		temp = ((int)(Chrominance_Quantization_Table[i] * quality_scale + 50) / 100);
 		if (temp<=0) 	temp = 1;
 		if (temp>0xFF) temp = 0xFF;
 		m_CbCrTable[ZigZag[i]] = (unsigned char)temp;
@@ -570,11 +570,11 @@ void JpegEncoder::_write_jpeg_header(FILE* fp)
 	_write_(Standard_AC_Luminance_NRCodes, sizeof(Standard_AC_Luminance_NRCodes), fp);
 	_write_(Standard_AC_Luminance_Values, sizeof(Standard_AC_Luminance_Values), fp); //we'll use the standard Huffman tables
 	_write_byte_(0x01, fp);			//HTCbDCinfo
-	_write_(Standard_DC_Chromiance_NRCodes, sizeof(Standard_DC_Chromiance_NRCodes), fp);
-	_write_(Standard_DC_Chromiance_Values, sizeof(Standard_DC_Chromiance_Values), fp);
+	_write_(Standard_DC_Chrominance_NRCodes, sizeof(Standard_DC_Chrominance_NRCodes), fp);
+	_write_(Standard_DC_Chrominance_Values, sizeof(Standard_DC_Chrominance_Values), fp);
 	_write_byte_(0x11, fp);			//HTCbACinfo
-	_write_(Standard_AC_Chromiance_NRCodes, sizeof(Standard_AC_Chromiance_NRCodes), fp);
-	_write_(Standard_AC_Chromiance_Values, sizeof(Standard_AC_Chromiance_Values), fp);
+	_write_(Standard_AC_Chrominance_NRCodes, sizeof(Standard_AC_Chrominance_NRCodes), fp);
+	_write_(Standard_AC_Chrominance_Values, sizeof(Standard_AC_Chrominance_Values), fp);
 
 	//SOS
 	_write_word_(0xFFDA, fp);		//marker = 0xFFC4
