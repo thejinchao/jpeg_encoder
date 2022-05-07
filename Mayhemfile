@@ -2,4 +2,4 @@ project: jbgreenh/jpeg-encoder
 target: fuzzjpeg
 
 cmds:
-  - cmd: /fuzzjpeg
+  - cmd: /fuzzjpeg @@
