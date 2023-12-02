@@ -1,17 +1,17 @@
-#ifndef __JPEG_ENCODER_HEADER__
+ï»¿#ifndef __JPEG_ENCODER_HEADER__
 #define __JPEG_ENCODER_HEADER__
 
 
 class JpegEncoder
 {
 public:
-	/** ÇåÀíÊı¾İ */
+	/** æ¸…ç†æ•°æ® */
 	void clean(void);
 
-	/** ´ÓBMPÎÄ¼şÖĞ¶ÁÈ¡ÎÄ¼ş£¬½öÖ§³Ö24bit£¬³¤¶ÈÊÇ8µÄ±¶ÊıµÄÎÄ¼ş */
+	/** ä»BMPæ–‡ä»¶ä¸­è¯»å–æ–‡ä»¶ï¼Œä»…æ”¯æŒ24bitï¼Œé•¿åº¦æ˜¯8çš„å€æ•°çš„æ–‡ä»¶ */
 	bool readFromBMP(const char* fileName);
 
-	/** Ñ¹Ëõµ½jpgÎÄ¼şÖĞ£¬quality_scale±íÊ¾ÖÊÁ¿£¬È¡Öµ·¶Î§(0,100), Êı×ÖÔ½´óÑ¹Ëõ±ÈÀıÔ½¸ß*/
+	/** å‹ç¼©åˆ°jpgæ–‡ä»¶ä¸­ï¼Œquality_scaleè¡¨ç¤ºè´¨é‡ï¼Œå–å€¼èŒƒå›´(0,100), æ•°å­—è¶Šå¤§å‹ç¼©æ¯”ä¾‹è¶Šé«˜*/
 	bool encodeToJPG(const char* fileName, int quality_scale);
 
 private:
@@ -36,13 +36,12 @@ private:
 
 private:
 	void _initHuffmanTables(void);
-	void _initCategoryAndBitcode(void);
 	void _initQualityTables(int quality);
 	void _computeHuffmanTable(const char* nr_codes, const unsigned char* std_table, BitString* huffman_table);
 	BitString _getBitCode(int value);
 
-	void _convertColorSpace(int xPos, int yPos, char* yData, char* cbData, char* crData);
-	void _foword_FDC(const char* channel_data, short* fdc_data);
+	void _convertColorSpace(const unsigned char* rgbBuffer, char* yData, char* cbData, char* crData);
+	void _foword_FDC(const char* channel_data, short* fdc_data, const unsigned char* quant_table);
 	void _doHuffmanEncoding(const short* DU, short& prevDC, const BitString* HTDC, const BitString* HTAC, 
 		BitString* outputBitString, int& bitStringCounts);
 

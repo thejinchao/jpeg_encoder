@@ -1,4 +1,4 @@
-#ifdef _MSC_VER
+ï»¿#ifdef _MSC_VER
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 
@@ -38,10 +38,10 @@ const unsigned char Chrominance_Quantization_Table[64] =
 //-------------------------------------------------------------------------------
 const char ZigZag[64] =
 { 
-	0, 1, 5, 6,14,15,27,28,
-	2, 4, 7,13,16,26,29,42,
-	3, 8,12,17,25,30,41,43,
-	9,11,18,24,31,40,44,53,
+	 0, 1, 5, 6,14,15,27,28,
+	 2, 4, 7,13,16,26,29,42,
+	 3, 8,12,17,25,30,41,43,
+	 9,11,18,24,31,40,44,53,
 	10,19,23,32,39,45,52,54,
 	20,22,33,38,46,51,55,60,
 	21,34,37,47,50,56,59,61,
@@ -118,7 +118,7 @@ JpegEncoder::JpegEncoder()
 	, m_height(0)
 	, m_rgbBuffer(0)
 {
-	//³õÊ¼»¯¾²Ì¬±í¸ñ
+	//åˆå§‹åŒ–é™æ€è¡¨æ ¼
 	_initHuffmanTables();
 }
 
@@ -141,10 +141,10 @@ void JpegEncoder::clean(void)
 //-------------------------------------------------------------------------------
 bool JpegEncoder::readFromBMP(const char* fileName)
 {
-	//ÇåÀí¾ÉÊı¾İ
+	//æ¸…ç†æ—§æ•°æ®
 	clean();
 
-	//BMP ÎÄ¼ş¸ñÊ½
+	//BMP æ–‡ä»¶æ ¼å¼
 #pragma pack(push, 2)
 	typedef struct {
 			unsigned short	bfType;
@@ -169,7 +169,7 @@ bool JpegEncoder::readFromBMP(const char* fileName)
 	} BITMAPINFOHEADER;
 #pragma pack(pop)
 
-	//´ò¿ªÎÄ¼ş
+	//æ‰“å¼€æ–‡ä»¶
 	FILE* fp = fopen(fileName, "rb");
 	if(fp==0) return false;
 
@@ -186,7 +186,7 @@ bool JpegEncoder::readFromBMP(const char* fileName)
 		if(infoHeader.biBitCount!=24 || infoHeader.biCompression!=0) break;
 		int width = infoHeader.biWidth;
 		int height = infoHeader.biHeight < 0 ? (-infoHeader.biHeight) : infoHeader.biHeight;
-		if((width&7)!=0 || (height&7)!=0) break;	//±ØĞëÊÇ8µÄ±¶Êı
+		if((width&7)!=0 || (height&7)!=0) break;	//å¿…é¡»æ˜¯8çš„å€æ•°
 
 		int bmpSize = width*height*3;
 
@@ -229,17 +229,17 @@ bool JpegEncoder::readFromBMP(const char* fileName)
 //-------------------------------------------------------------------------------
 bool JpegEncoder::encodeToJPG(const char* fileName, int quality_scale)
 {
-	//ÉĞÎ´¶ÁÈ¡£¿
+	//å°šæœªè¯»å–ï¼Ÿ
 	if(m_rgbBuffer==0 || m_width==0 || m_height==0) return false;
 
-	//Êä³öÎÄ¼ş
+	//è¾“å‡ºæ–‡ä»¶
 	FILE* fp = fopen(fileName, "wb");
 	if(fp==0) return false;
 
-	//³õÊ¼»¯Á¿»¯±í
+	//åˆå§‹åŒ–é‡åŒ–è¡¨
 	_initQualityTables(quality_scale);
 
-	//ÎÄ¼şÍ·
+	//æ–‡ä»¶å¤´
 	_write_jpeg_header(fp);
 
 	short prev_DC_Y = 0, prev_DC_Cb = 0, prev_DC_Cr = 0;
@@ -252,27 +252,33 @@ bool JpegEncoder::encodeToJPG(const char* fileName, int quality_scale)
 			char yData[64], cbData[64], crData[64];
 			short yQuant[64], cbQuant[64], crQuant[64];
 
-			//×ª»»ÑÕÉ«¿Õ¼ä
-			_convertColorSpace(xPos, yPos, yData, cbData, crData);
+			//è½¬æ¢é¢œè‰²ç©ºé—´, rgbBuffer -> (yData, cbData, crData), [-128,128]
+			unsigned char* rgbBuffer = m_rgbBuffer + yPos * m_width * 3 + xPos * 3;
+			_convertColorSpace(rgbBuffer, yData, cbData, crData);
 
 			BitString outputBitString[128];
 			int bitStringCounts;
 
-			//YÍ¨µÀÑ¹Ëõ
-			_foword_FDC(yData, yQuant);
+			//Yé€šé“å‹ç¼©(yData -> yQuant)
+			_foword_FDC(yData, yQuant, m_YTable);
 			_doHuffmanEncoding(yQuant, prev_DC_Y, m_Y_DC_Huffman_Table, m_Y_AC_Huffman_Table, outputBitString, bitStringCounts); 
 			_write_bitstring_(outputBitString, bitStringCounts, newByte, newBytePos, fp);
 
-			//CbÍ¨µÀÑ¹Ëõ
-			_foword_FDC(cbData, cbQuant);			
+			//Cbé€šé“å‹ç¼©(cbData -> cbQuant)
+			_foword_FDC(cbData, cbQuant, m_CbCrTable);			
 			_doHuffmanEncoding(cbQuant, prev_DC_Cb, m_CbCr_DC_Huffman_Table, m_CbCr_AC_Huffman_Table, outputBitString, bitStringCounts);
 			_write_bitstring_(outputBitString, bitStringCounts, newByte, newBytePos, fp);
 
-			//CrÍ¨µÀÑ¹Ëõ
-			_foword_FDC(crData, crQuant);			
+			//Cré€šé“å‹ç¼©(crData -> crQuant)
+			_foword_FDC(crData, crQuant, m_CbCrTable);
 			_doHuffmanEncoding(crQuant, prev_DC_Cr, m_CbCr_DC_Huffman_Table, m_CbCr_AC_Huffman_Table, outputBitString, bitStringCounts);
 			_write_bitstring_(outputBitString, bitStringCounts, newByte, newBytePos, fp);
 		}
+	}
+
+	//flush remain data
+	if (newBytePos != 7) {
+		_write_byte_(newByte, fp);
 	}
 
 	_write_word_(0xFFD9, fp); //Write End of Image Marker   
@@ -303,7 +309,7 @@ JpegEncoder::BitString JpegEncoder::_getBitCode(int value)
 	BitString ret;
 	int v = (value>0) ? value : -value;
 	
-	//bit µÄ³¤¶È
+	//bit çš„é•¿åº¦
 	int length = 0;
 	for(length=0; v; v>>=1) length++;
 
@@ -461,11 +467,11 @@ void JpegEncoder::_write_bitstring_(const BitString* bs, int counts, int& newByt
 }
 
 //-------------------------------------------------------------------------------
-void JpegEncoder::_convertColorSpace(int xPos, int yPos, char* yData, char* cbData, char* crData)
+void JpegEncoder::_convertColorSpace(const unsigned char* rgbBuffer, char* yData, char* cbData, char* crData)
 {
 	for (int y=0; y<8; y++)
 	{
-		unsigned char* p = m_rgbBuffer + (y+yPos)*m_width*3 + xPos*3;
+		const unsigned char* p = rgbBuffer + y*m_width*3;
 		for (int x=0; x<8; x++)
 		{
 			unsigned char B = *p++;
@@ -480,15 +486,15 @@ void JpegEncoder::_convertColorSpace(int xPos, int yPos, char* yData, char* cbDa
 }
 
 //-------------------------------------------------------------------------------
-void JpegEncoder::_foword_FDC(const char* channel_data, short* fdc_data)
+void JpegEncoder::_foword_FDC(const char* channel_data, short* fdc_data, const unsigned char* quant_table)
 {
 	const float PI = 3.1415926f;
 	for(int v=0; v<8; v++)
 	{
 		for(int u=0; u<8; u++)
 		{
-			float alpha_u = (u==0) ? 1/sqrt(8.0f) : 0.5f;
-			float alpha_v = (v==0) ? 1/sqrt(8.0f) : 0.5f;
+			float alpha_u = (u==0) ? 1.f/sqrtf(8.0f) : 0.5f;
+			float alpha_v = (v==0) ? 1.f/sqrtf(8.0f) : 0.5f;
 
 			float temp = 0.f;
 			for(int x=0; x<8; x++)
@@ -497,15 +503,17 @@ void JpegEncoder::_foword_FDC(const char* channel_data, short* fdc_data)
 				{
 					float data = channel_data[y*8+x];
 
-					data *= cos((2*x+1)*u*PI/16.0f);
-					data *= cos((2*y+1)*v*PI/16.0f);
+					data *= cosf((2*x+1)*u*PI/16.0f);
+					data *= cosf((2*y+1)*v*PI/16.0f);
 
 					temp += data;
 				}
 			}
-
-			temp *= alpha_u*alpha_v/m_YTable[ZigZag[v*8+u]];
-			fdc_data[ZigZag[v*8+u]] = (short) ((short)(temp + 16384.5) - 16384);
+			int zigZagIndex = ZigZag[v * 8 + u];
+			
+			//é‡åŒ–
+			temp *= alpha_u*alpha_v/ quant_table[zigZagIndex];
+			fdc_data[zigZagIndex] = (short) ((short)(temp + 16384.5) - 16384);
 		}
 	}
 }
